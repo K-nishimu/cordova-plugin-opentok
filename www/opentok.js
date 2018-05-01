@@ -5,11 +5,14 @@ window.OT = {
   initPublisher: function(one, two) {
     return new TBPublisher(one, two);
   },
-  initSession: function(apiKey, sessionId) {
+  initSession: function(apiKey, sessionId, callType) {
     if (sessionId == null) {
       this.showError("OT.initSession takes 2 parameters, your API Key and Session ID");
     }
-    return new TBSession(apiKey, sessionId);
+    if (!callType) {
+      callType = 'video';
+    }
+    return new TBSession(apiKey, sessionId, callType);
   },
   log: function(message) {
     return pdebug("TB LOG", message);
@@ -676,9 +679,10 @@ TBSession = (function() {
     return Cordova.exec(TBSuccess, TBError, OTPlugin, "unsubscribe", [subscriber.streamId]);
   };
 
-  function TBSession(apiKey, sessionId) {
+  function TBSession(apiKey, sessionId, callType) {
     this.apiKey = apiKey;
     this.sessionId = sessionId;
+    this.callType = callType;
     this.signalReceived = __bind(this.signalReceived, this);
     this.subscribedToStream = __bind(this.subscribedToStream, this);
     this.streamDestroyed = __bind(this.streamDestroyed, this);
@@ -698,7 +702,7 @@ TBSession = (function() {
     this.streams = {};
     this.alreadyPublishing = false;
     OT.getHelper().eventing(this);
-    Cordova.exec(TBSuccess, TBSuccess, OTPlugin, "initSession", [this.apiKey, this.sessionId]);
+    Cordova.exec(TBSuccess, TBSuccess, OTPlugin, "initSession", [this.apiKey, this.sessionId, this.callType]);
   }
 
   TBSession.prototype.cleanUpDom = function() {

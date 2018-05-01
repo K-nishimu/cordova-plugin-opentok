@@ -6,17 +6,21 @@
 //
 
 #import "OpenTokPlugin.h"
+#import "OTDefaultAudioDeviceWithVolumeControl.h"
+
 
 @implementation OpenTokPlugin{
     OTSession* _session;
     OTPublisher* _publisher;
     OTSubscriber* _subscriber;
+    OTDefaultAudioDeviceWithVolumeControl *audioDevice;
     NSMutableDictionary *subscriberDictionary;
     NSMutableDictionary *connectionDictionary;
     NSMutableDictionary *streamDictionary;
     NSMutableDictionary *callbackList;
     NSString *apiKey;
     NSString *sessionId;
+    NSString *callType;
     NSMutableDictionary *observersDictionary;
 }
 
@@ -79,6 +83,11 @@
     // Get Parameters
     apiKey = [command.arguments objectAtIndex:0];
     sessionId = [command.arguments objectAtIndex:1];
+    callType = [command.arguments objectAtIndex:2];
+
+    // Using custom audio driver
+    audioDevice = [OTDefaultAudioDeviceWithVolumeControl new];
+    [OTAudioDeviceManager setAudioDevice:audioDevice];
 
     // Create Session
     _session = [[OTSession alloc] initWithApiKey: apiKey sessionId:sessionId delegate:self];
@@ -404,6 +413,15 @@
  ****/
 - (void)subscriberDidConnectToStream:(OTSubscriberKit*)sub{
     NSLog(@"iOS Connected To Stream");
+
+    // Speaker does not switch unless it receives Subscriber's Stream
+    // switch speaker
+    if ([callType isEqualToString:@"voice"]) {
+        [audioDevice configureAudioSessionWithDesiredAudioRoute:AUDIO_DEVICE_HEADSET];
+    } else {
+        [audioDevice configureAudioSessionWithDesiredAudioRoute:AUDIO_DEVICE_SPEAKER];
+    }
+
     NSMutableDictionary* eventData = [[NSMutableDictionary alloc] init];
     NSString* streamId = sub.stream.streamId;
     [eventData setObject:streamId forKey:@"streamId"];
@@ -444,7 +462,7 @@
 - (void)subscriberVideoEnabled:(OTSubscriberKit*)sub reason:(OTSubscriberVideoEventReason)reason{
     NSMutableDictionary* eventData = [[NSMutableDictionary alloc] init];
     NSString* reasonData = [self validateReason: reason];
-    
+
     [eventData setObject: reasonData forKey:@"reason"];
     [self triggerJSEvent: @"subscriberEvents" withType: @"videoEnabled" withData: eventData];
 }
