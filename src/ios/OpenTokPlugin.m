@@ -444,7 +444,7 @@
 - (void)subscriberVideoEnabled:(OTSubscriberKit*)sub reason:(OTSubscriberVideoEventReason)reason{
     NSMutableDictionary* eventData = [[NSMutableDictionary alloc] init];
     NSString* reasonData = [self validateReason: reason];
-    
+
     [eventData setObject: reasonData forKey:@"reason"];
     [self triggerJSEvent: @"subscriberEvents" withType: @"videoEnabled" withData: eventData];
 }
@@ -609,6 +609,10 @@
     [subscriberDictionary removeAllObjects];
     if( _publisher ){
         [_publisher.view removeFromSuperview];
+    }
+    // Remove session observers
+    for ( id key in streamDictionary ) {
+        [self removeObserversFromStream: [streamDictionary objectForKey:key]];
     }
 
     // Setting up event object
