@@ -615,7 +615,7 @@
         [self removeObserversFromStream: [streamDictionary objectForKey:key]];
     }
 
-    [streamDictionary removeAllObjects]
+    [streamDictionary removeAllObjects];
 
     // Setting up event object
     NSMutableDictionary* eventData = [[NSMutableDictionary alloc] init];
