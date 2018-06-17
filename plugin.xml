@@ -16,7 +16,7 @@
       <framework src="com.android.volley:volley:1.1.0" />
       <asset src="www/opentok.js" target="opentok.js" />
   	  <source-file src="src/android/OpenTokAndroidPlugin.java" target-dir="src/com/tokbox/cordova/" />
-      
+
       <config-file target="AndroidManifest.xml" parent="/manifest">
         <uses-permission android:name="android.permission.CAMERA" />
         <uses-permission android:name="android.permission.INTERNET" />
@@ -34,8 +34,8 @@
           <param name="android-package" value="com.tokbox.cordova.OpenTokAndroidPlugin"/>
           <param name="onload" value="true" />
         </feature>
-      </config-file>  
-      
+      </config-file>
+
     </platform>
 
     <!-- ios -->
@@ -44,7 +44,11 @@
       <asset src="www/opentok.js" target="opentok.js" />
 
       <header-file src="src/ios/OpenTokPlugin.h" />
+      <header-file src="src/ios/OTDefaultAudioDevice.h" />
+      <header-file src="src/ios/OTDefaultAudioDeviceWithVolumeControl.h" />
       <source-file src="src/ios/OpenTokPlugin.m" />
+      <source-file src="src/ios/OTDefaultAudioDevice.m" />
+      <source-file src="src/ios/OTDefaultAudioDeviceWithVolumeControl.m" />
 
       <framework src="libstdc++.dylib" />
       <framework src="libc++.dylib" />

@@ -35,6 +35,8 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
+import com.opentok.android.AudioDeviceManager;
+import com.opentok.android.BaseAudioDevice;
 import com.opentok.android.Connection;
 import com.opentok.android.OpentokError;
 import com.opentok.android.Publisher;
@@ -57,6 +59,7 @@ public class OpenTokAndroidPlugin extends CordovaPlugin
 
     private String sessionId;
     private String apiKey;
+    private String callType;
     protected Session mSession;
     public static final String TAG = "OTPlugin";
     public boolean sessionConnected;
@@ -289,7 +292,7 @@ public class OpenTokAndroidPlugin extends CordovaPlugin
         public void onStreamCreated(PublisherKit arg0, Stream arg1) {
             Log.i(TAG, "publisher stream received");
             streamCollection.put(arg1.getStreamId(), arg1);
-            
+
             streamHasAudio.put(arg1.getStreamId(), arg1.hasAudio());
             streamHasVideo.put(arg1.getStreamId(), arg1.hasVideo());
             JSONObject videoDimensions = new JSONObject();
@@ -393,6 +396,16 @@ public class OpenTokAndroidPlugin extends CordovaPlugin
 
         @Override
         public void onConnected(SubscriberKit arg0) {
+            // Speaker does not switch unless it receives Subscriber's Stream
+            // switch speaker
+            if (callType.equals("voice")) {
+                Log.d(TAG, "debug - Handset");
+                AudioDeviceManager.getAudioDevice().setOutputMode(BaseAudioDevice.OutputMode.Handset);
+            } else {
+                Log.d(TAG, "debug - SpeakerPhone");
+                AudioDeviceManager.getAudioDevice().setOutputMode(BaseAudioDevice.OutputMode.SpeakerPhone);
+            }
+
             // TODO Auto-generated method stub
             JSONObject eventData = new JSONObject();
             String streamId = arg0.getStream().getStreamId();
@@ -544,6 +557,8 @@ public class OpenTokAndroidPlugin extends CordovaPlugin
         } else if (action.equals("initSession")) {
             apiKey = args.getString(0);
             sessionId = args.getString(1);
+            callType = args.getString(2);
+
             Log.i(TAG, "created new session with data: " + args.toString());
             mSession = new Session(this.cordova.getActivity().getApplicationContext(), apiKey, sessionId);
             mSession.setSessionListener(this);
@@ -874,7 +889,7 @@ public class OpenTokAndroidPlugin extends CordovaPlugin
     @Override
     public void onStreamVideoDimensionsChanged(Session session, Stream stream, int width, int height) {
         JSONObject oldValue = this.streamVideoDimensions.get(stream.getStreamId());
-        
+
         JSONObject newValue = new JSONObject();
         try {
             newValue.put("width", width);
