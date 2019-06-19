@@ -5,7 +5,7 @@ module.exports = function (context) {
     var downloadFile = require('./downloadFile.js'),
         exec = require('./exec/exec.js'),
         Q = require('q'),
-        deferral = new Q.defer();
+        deferral = Q.defer();
     console.log('Downloading OpenTok iOS SDK');
     downloadFile('https://s3.amazonaws.com/artifact.tokbox.com/rel/ios-sdk/' + IosSDKVersion + '.tar.bz2',
         './' + IosSDKVersion + '.tar.bz2', function (err) {
